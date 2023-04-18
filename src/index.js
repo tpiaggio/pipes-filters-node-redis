@@ -2,7 +2,7 @@ const express = require('express');
 const redis = require('redis');
 const Queue = require('bull');
 const { Pipeline } = require("./Pipeline");
-const { toUpperCaseFilter, addExclamationFilter, trimFilter } = require("./filters");
+const { joinWordsFilter, toUpperCaseFilter, addFullStopFilter, trimFilter } = require("./filters");
 
 const app = express();
 const port = 3000;
@@ -22,21 +22,22 @@ redisClient.on('error', function(err) {
 // Bull job processor
 async function jobProcessor(job, done) {
   console.log(`Processing job ${job.id}`);
-  let data = job.data;
+  const data = job.data;
   
   // Apply filters
   var pipeline = new Pipeline();
 
-  pipeline.use(toUpperCaseFilter);
+  pipeline.use(joinWordsFilter);
   pipeline.use(trimFilter);
-  pipeline.use(addExclamationFilter);
+  pipeline.use(toUpperCaseFilter);
+  pipeline.use(addFullStopFilter);
 
-  data = pipeline.run(data);
+  const message = pipeline.run(data);
   
   // Send the processed data to Redis or another data store
   await redisClient.connect();
   try {
-    await redisClient.set(`job_${job.id}`, data.message);
+    await redisClient.set(`job_${job.id}`, message);
   } catch (err) {
     console.log(err);
     done(err);

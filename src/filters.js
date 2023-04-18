@@ -1,17 +1,14 @@
-function toUpperCaseFilter(data) {
-  return {
-    message: data.message.toUpperCase()
-  }
+function joinWordsFilter(object) {
+  return Object.values(object).join(' ');
 }
-function addExclamationFilter(data) {
-  return {
-    message: `${data.message}!`
-  }
+function toUpperCaseFilter(message) {
+  return message[0].toUpperCase() + message.slice(1);
 }
-function trimFilter(data) {
-  return {
-    message: data.message.trim()
-  }
+function addFullStopFilter(message) {
+  return `${message}.`;
+}
+function trimFilter(message) {
+  return message.trim();
 }
 
-module.exports = { toUpperCaseFilter, addExclamationFilter, trimFilter };
+module.exports = { joinWordsFilter, toUpperCaseFilter, addFullStopFilter, trimFilter };
